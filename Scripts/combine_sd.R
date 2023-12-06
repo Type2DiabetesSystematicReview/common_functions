@@ -6,6 +6,9 @@
 ## as these are randomised groups
 ## instead just assume same SD across groups and pool
 ## Note comb mean is the same for both
+
+## Originally taken from above link. Latest link and text are here https://training.cochrane.org/handbook/current/chapter-06#section-6-5-2-10
+
 CombMean <- function(n1, m1, n2, m2){
   top <- n1*m1 + n2*m2
   top/(n1+n2)
@@ -20,6 +23,7 @@ CombSd <- function(n1, m1, n2, m2, s1, s2){
 
 
 ## test this, it is correct
+function() {
 a <- rnorm(10, sample(1:100, 1), sample(5:15, 1))
 b <- rnorm(10, sample(1:100, 1), sample(5:15, 1))
 ab <- c(a, b)
@@ -27,7 +31,7 @@ means <- map_dbl(list(a, b, ab), mean)
 sds <- map_dbl(list(a, b, ab), sd)
 mean_res <- CombMean(n1 = 10, m1 = means[1], n2 = 10, m2 = means[2])
 sd_res <- CombSd(n1 = 10, m1 = means[1], n2 = 10, m2 = means[2], s1 = sds[1], s2 = sds[2])
-
+}
 # means
 # sds
 # mean_res
@@ -59,8 +63,8 @@ CombSdVectorised <- function(n, m, s){
     s <- s[-2]
     m <- m[-2]
     n <- n[-2]
-    print(s)
-    print(m)
+    # print(s)
+    # print(m)
     ## recalculate the length
     myrows_now <- length(s)
   }
@@ -69,6 +73,7 @@ CombSdVectorised <- function(n, m, s){
 
 
 ## test this, it is correct
+function() {
 myvects <- map(rep(1, 10), ~ rnorm(sample(2:10, 1), sample(1:100, .x), sample(5:15, .x)))
 mymeans <- map_dbl(myvects, mean)
 mysds <- map_dbl(myvects, sd)
@@ -76,7 +81,7 @@ myns <- map_dbl(myvects, length)
 
 a <- CombSdVectorised(n = myns, m = mymeans, s = mysds)
 sd(unlist(myvects))
-a
+a}
 
 ##Vectorised and simple pooled means and sds, note that in the mean case it is 
 ## just a weighted means

@@ -2,7 +2,7 @@ MakeDist <- function(m, s, l, u){
   freqs <- msm::ptnorm(seq(0, 100, 1),
                        mean = m, sd = s,
                        lower = l, upper = u)
-  freqs <- freqs - lag(freqs, default = 0)
+  freqs <- freqs - dplyr::lag(freqs, default = 0)
   freqs <- freqs/sum(freqs)
   freqs
 }
@@ -66,3 +66,18 @@ EstimateMuDispAge <- function (x) {
     select(trial_mean, mean_x, trial_var, var_x, mu_x, sd_x, trial_sd, everything())
   estimate 
 }
+
+
+MuSigmaCalc <- function(lower, upper, mean, sd) {
+  ## Supply lower, upper, mean and sd
+  ## function obtains values of mu and sigma which give
+  ## values of mean and sd closest to the observed values
+  ## mu and sigma are constrained (0-100) and 1-50 respectively
+  
+  ToMin <- function(mu_sigma) {
+    abs(mean - mean.tnorm(mu_sigma[1], mu_sigma[2], lower, upper)) +
+      abs(sd - var.tnorm(mu_sigma[1], mu_sigma[2], lower, upper)^0.5)
+  }
+  optim(par = c(mean, sd), ToMin, method = "L-BFGS-B", lower = c(0,1), upper = c(100, 50))
+}
+

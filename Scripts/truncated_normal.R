@@ -68,16 +68,21 @@ EstimateMuDispAge <- function (x) {
 }
 
 
-MuSigmaCalc <- function(lower, upper, mean, sd) {
+MuSigmaCalc <- function(lower, upper, mean, sd, mymethod) {
   ## Supply lower, upper, mean and sd
   ## function obtains values of mu and sigma which give
   ## values of mean and sd closest to the observed values
   ## mu and sigma are constrained (0-100) and 1-50 respectively
   
   ToMin <- function(mu_sigma) {
-    abs(mean - mean.tnorm(mu_sigma[1], mu_sigma[2], lower, upper)) +
-      abs(sd - var.tnorm(mu_sigma[1], mu_sigma[2], lower, upper)^0.5)
+    abs(mean - truncnorm::etruncnorm(mean = mu_sigma[1], sd = mu_sigma[2], a = lower, b = upper)) +
+      abs(sd - truncnorm::vtruncnorm(mean = mu_sigma[1], sd = mu_sigma[2], a = lower, b = upper)^0.5)
   }
-  optim(par = c(mean, sd), ToMin, method = "L-BFGS-B", lower = c(0,1), upper = c(100, 50))
+  if (mymethod == "L-BFGS-B") {
+    optim(par = c(mean, sd), ToMin, method = mymethod, lower = c(0, 0.1*sd), upper = c(mean + 3*sd, 5*sd))
+  } else {
+    optim(par = c(mean, sd), ToMin, method = mymethod,)
+    
+  }
 }
 

@@ -41,8 +41,8 @@ EstimateMuDispAge <- function (x) {
   full_grid <- expand.grid(mu_x = mu_x, sd_x = sd_x)
   
   ## Calculate for all values of grid, is vectorised so is fast, is faster than one in truncnorm package
-  full_grid$mean_x <- mean.tnorm(full_grid$mu_x, full_grid$sd_x, lower, upper)
-  full_grid$var_x <- var.tnorm(full_grid$mu_x, full_grid$sd_x, lower, upper)
+  full_grid$mean_x <- truncated_normal_mean(full_grid$mu_x, full_grid$sd_x, lower, upper)
+  full_grid$var_x <- truncated_normal_variance(full_grid$mu_x, full_grid$sd_x, lower, upper)
   
   # print(nrow(full_grid))
   # browser()  

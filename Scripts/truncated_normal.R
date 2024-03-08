@@ -7,25 +7,23 @@ MakeDist <- function(m, s, l, u){
   freqs
 }
 
-# Functions for truncted normal distributions
-# https://www.r-bloggers.com/truncated-normal-distribution/
-mean.tnorm<-function(mu,sigma,a,b){
-  ##return the expectation of a truncated normal distribution
-  lower.std=(a-mu)/sigma
-  upper.std=(b-mu)/sigma
-  mean=mu+sigma*(dnorm(lower.std)-dnorm(upper.std))/
-    (pnorm(upper.std)-pnorm(lower.std))
-  return(mean)
+# Functions for truncted normal distributions written by asking copilot to re-write wikipedia equations as R code
+# Checked and give correct results
+truncated_normal_mean <- function(mu, sigma, a, b) {
+  alpha <- (a - mu) / sigma
+  beta <- (b - mu) / sigma
+  Z <- pnorm(beta) - pnorm(alpha)
+  return(mu + (dnorm(alpha) - dnorm(beta)) * sigma / Z)
 }
-var.tnorm<-function(mu,sigma,a,b){
-  ##return the variance of a truncated normal distribution
-  lower.std=(a-mu)/sigma
-  upper.std=(b-mu)/sigma
-  variance=sigma^2*(1+(lower.std*dnorm(lower.std)-upper.std*dnorm(upper.std))/
-                      (pnorm(upper.std)-pnorm(lower.std))-((dnorm(lower.std)-dnorm(upper.std))/
-                                                             (pnorm(upper.std)-pnorm(lower.std)))^2)
-  return(variance)
+
+truncated_normal_variance <- function(mu, sigma, a, b) {
+  alpha <- (a - mu) / sigma
+  beta <- (b - mu) / sigma
+  Z <- pnorm(beta) - pnorm(alpha)
+  variance_value <- sigma^2 * (1 - (beta * dnorm(beta) - alpha * dnorm(alpha)) / Z - ((dnorm(alpha) - dnorm(beta)) / Z)^2)
+  return(variance_value)
 }
+
 
 EstimateMuDispAge <- function (x) {
   # Loop through trials
@@ -67,7 +65,6 @@ EstimateMuDispAge <- function (x) {
   estimate 
 }
 
-
 MuSigmaCalc <- function(x_min, x_max, mean, sd, mymethod) {
   ## Supply lower, upper, mean and sd
   ## function obtains values of mu and sigma which give
@@ -75,8 +72,8 @@ MuSigmaCalc <- function(x_min, x_max, mean, sd, mymethod) {
   ## mu and sigma are constrained (0-100) and 1-50 respectively
   # browser()
   ToMin <- function(mu_sigma, ...) {
-    abs(mean - mean.tnorm(mu = mu_sigma[1], sigma = mu_sigma[2], a = x_min, b = x_max)) +
-      abs(sd - var.tnorm(mu = mu_sigma[1], sigma = mu_sigma[2], a = x_min, b = x_max)^0.5)
+    abs(mean - truncated_normal_mean(mu = mu_sigma[1], sigma = mu_sigma[2], a = x_min, b = x_max)) +
+      abs(sd - truncated_normal_variance(mu = mu_sigma[1], sigma = mu_sigma[2], a = x_min, b = x_max)^0.5)
   }
   if (mymethod == "L-BFGS-B") {
     optim(par = c(mean, sd), fn = ToMin, method = mymethod, lower = c(0, 0.1*sd), upper = c(mean + 3*sd, 5*sd))
